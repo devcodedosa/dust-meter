@@ -13,7 +13,7 @@ static const char *TAG = "BOARD_TEST";
 static void test_gpio(void);
 static void test_i2c(void);
 static void test_oled(void);
-static void test_sht31(void);
+static void test_sht30(void);
 static void test_d9(void);
 
 /* Wait for USB Serial/JTAG input */
@@ -80,8 +80,8 @@ static void test_oled(void)
     printf("OLED test is not implemented yet.\n");
 }
 
-/* SHT31 test */
-static void test_sht31(void)
+/* SHT30 test */
+static void test_sht30(void)
 {
     ESP_LOGI(TAG, "SHT30 TEST");
     printf("SHT30 test is not implemented yet.\n");
@@ -112,7 +112,7 @@ static void process_menu(int selection)
             break;
 
         case 4:
-            test_sht31();
+            test_sht30();
             break;
 
         case 5:
