@@ -149,6 +149,18 @@ esp_err_t sht30_read(
     uint16_t raw_humidity =
         ((uint16_t)data[3] << 8) | data[4];
 
+    
+    // Debug Codes
+    ESP_LOGI(TAG,
+         "RAW DATA: T=0x%04X (%u), H=0x%04X (%u)",
+         raw_temp,
+         raw_temp,
+         raw_humidity,
+         raw_humidity);
+
+    ESP_LOG_BUFFER_HEX(TAG, data, sizeof(data));
+
+
     // 7. 실제 측정값 계산
     *temperature =
         -45.0f + (175.0f * raw_temp / 65535.0f);
