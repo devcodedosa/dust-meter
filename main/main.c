@@ -9,6 +9,8 @@
 #include "i2c_scan.h"
 #include "sht30.h"
 #include "oled.h"
+#include "gpio_test.h"
+#include "lib.h"
 
 static const char *TAG = "BOARD_TEST";
 
@@ -16,7 +18,6 @@ static const char *TAG = "BOARD_TEST";
 #define I2C_SCL_GPIO   9
 
 /* Test function declarations */
-static void test_gpio(void);
 static void test_i2c(void);
 static void test_oled(void);
 static void test_sht30(void);
@@ -44,29 +45,8 @@ static esp_err_t i2c_init(void)
  * Enter 입력 시 true 반환
  * 입력이 없으면 false 반환
  */
-static bool wait_for_enter(uint32_t timeout_ms)
-{
-    uint32_t elapsed = 0;
 
-    while (elapsed < timeout_ms) {
 
-        int ch = getchar();
-
-        if (ch != EOF) {
-            if (ch == '\r' || ch == '\n') {
-                return true;
-            }
-        } else {
-            /* STDIN EOF 상태 초기화 */
-            clearerr(stdin);
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(10));
-        elapsed += 10;
-    }
-
-    return false;
-}
 
 /* Wait for USB Serial/JTAG input */
 static int console_getchar(void)
@@ -96,11 +76,13 @@ static void show_menu(void)
     printf("======================================\n");
     printf("\n");
 
-    printf("  1. GPIO TEST\n");
+    printf("  1. GPIO LED TEST\n");
     printf("  2. I2C SCAN\n");
     printf("  3. OLED TEST\n");
     printf("  4. SHT30 TEST\n");
     printf("  5. D9 SENSOR TEST\n");
+    printf("  6. GPIO ALL TEST\n");
+    printf("  7. GPIO BUZZER TEST\n");
     printf("\n");
 
     printf("  0. EXIT / MAIN MENU\n");
@@ -110,26 +92,19 @@ static void show_menu(void)
     fflush(stdout);
 }
 
-/* GPIO test */
-static void test_gpio(void)
-{
-    ESP_LOGI(TAG, "GPIO TEST");
-    printf("GPIO test is not implemented yet.\n");
-}
 
 /* I2C test */
 static void test_i2c(void)
 {
     ESP_LOGI(TAG, "I2C SCAN");
     i2c_scan_test(i2c_bus);
-    //printf("I2C scan is not implemented yet.\n");
+
 }
 
 /* OLED test */
 static void test_oled(void)
 {
     ESP_LOGI(TAG, "OLED TEST");
-    //printf("OLED test is not implemented yet.\n");
          
     /* OLED 테스트 패턴 출력 */
     ESP_ERROR_CHECK(oled_test_pattern());
@@ -185,7 +160,7 @@ static void process_menu(int selection)
     switch (selection)
     {
         case 1:
-            test_gpio();
+            gpio_test_led();
             break;
 
         case 2:
@@ -202,6 +177,14 @@ static void process_menu(int selection)
 
         case 5:
             test_d9();
+            break;
+
+        case 6:
+            gpio_test_all();
+            break;
+
+        case 7:
+            gpio_test_buzzer();
             break;
 
         case 0:
@@ -231,11 +214,8 @@ void app_main(void)
         SHT30_I2C_ADDR_DEFAULT
     ));
 
-    /*
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "SHT30 initialization failed");
-        return;
-    }*/
+    /* GPIO test init */
+    ESP_ERROR_CHECK(gpio_test_init());
     
 
     while (1)
@@ -253,13 +233,13 @@ void app_main(void)
 
         printf("%c\n", ch);
 
-        if (ch >= '0' && ch <= '5')
+        if (ch >= '0' && ch <= '9')
         {
             process_menu(ch - '0');
         }
         else
         {
-            printf("Invalid input. Please select 0~5.\n");
+            printf("Invalid input. Please select 0~9.\n");
         }
 
         vTaskDelay(pdMS_TO_TICKS(300));
