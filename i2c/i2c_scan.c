@@ -18,41 +18,17 @@
 
 static const char *TAG = "I2C_SCAN";
 
-void i2c_scan_test(void)
+void i2c_scan_test(i2c_master_bus_handle_t bus_handle)
 {
     printf("\n");
     printf("================================\n");
     printf("          I2C SCANNER\n");
     printf("================================\n\n");
 
-    /* I2C bus configuration */
-    i2c_master_bus_config_t bus_config = {
-        .i2c_port = I2C_NUM_0,
-        .sda_io_num = I2C_MASTER_SDA_IO,
-        .scl_io_num = I2C_MASTER_SCL_IO,
-        .clk_source = I2C_CLK_SRC_DEFAULT,
-        .glitch_ignore_cnt = 7,
-        .flags.enable_internal_pullup = false,
-    };
-
-    i2c_master_bus_handle_t bus_handle;
-
-    /* Initialize I2C master bus */
-    esp_err_t ret = i2c_new_master_bus(
-        &bus_config,
-        &bus_handle
-    );
-
-    if (ret != ESP_OK)
-    {
-        ESP_LOGE(TAG, "I2C initialization failed: %s",
-                 esp_err_to_name(ret));
-
-        return;
-    }
 
     printf("Scanning I2C bus...\n\n");
 
+    esp_err_t ret;
     int found_count = 0;
 
     /* Scan I2C address range */
@@ -95,6 +71,7 @@ void i2c_scan_test(void)
     
 
     /* Release I2C bus */
+#ifdef REMOVE_I2C
     ret = i2c_del_master_bus(bus_handle);
 
     if (ret != ESP_OK)
@@ -102,4 +79,5 @@ void i2c_scan_test(void)
         ESP_LOGE(TAG, "I2C bus release failed: %s",
                  esp_err_to_name(ret));
     }
+#endif
 }
